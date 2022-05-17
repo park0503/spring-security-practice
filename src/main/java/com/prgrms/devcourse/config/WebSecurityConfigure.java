@@ -1,14 +1,44 @@
 package com.prgrms.devcourse.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.*;
+import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        String idForEncode = "noop";
+        Map<String, PasswordEncoder> encoders = new HashMap<>();
+        encoders.put("bcrypt", new BCryptPasswordEncoder());
+        encoders.put(idForEncode, org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance());
+        encoders.put("pbkdf2", new Pbkdf2PasswordEncoder());
+        encoders.put("scrypt", new SCryptPasswordEncoder());
+        encoders.put("sha256", new StandardPasswordEncoder());
+        PasswordEncoder passwordEncoder = new DelegatingPasswordEncoder(idForEncode, encoders);
+
+        auth
+                .inMemoryAuthentication()
+                .withUser("user")
+                .password(passwordEncoder.encode("user123"))
+                .roles("USER")
+                .and()
+                .withUser("admin")
+                .password(passwordEncoder.encode("admin123"))
+                .roles("ADMIN");
+    }
+
     @Override
     //필터 체인 관련 전역 설정을 처리할 수 있는 API 제공)
     public void configure(WebSecurity web) throws Exception {
@@ -25,8 +55,16 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
                 .anyRequest().permitAll()
                 .and()
                 .formLogin()//스프링 시큐리티가 자동으로 로그인 페이지를 생성해 주는 것을 생성
-                .defaultSuccessUrl("/") //성공 시 리다이렉트 페이지
+                .defaultSuccessUrl("/me") //성공 시 리다이렉트 페이지
                 .permitAll() //로그인 페이지는 익명 페이지
+                .and()
+                .logout()
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/")
+                .and()
+                .rememberMe()
+                .rememberMeParameter("remember-me")
+                .tokenValiditySeconds(300)
                 .and()
         ;
     }
