@@ -1,6 +1,6 @@
 spring:
   application:
-    name: spring security 01
+    name: spring security 02
   thymeleaf:
     cache: true
   security:
@@ -13,4 +13,11 @@ spring:
     encoding: UTF-8
     cache-duration: PT1H
 server:
-  port: 8080
+  ssl:
+    enabled: true
+    key-alias: prgrms_keystore
+    key-store: classpath:prgrms_keystore.p12
+    key-store-password: 1q2w3e4r
+    key-password: 1q2w3e4r
+    trust-store: classpath:prgrms_truststore.p12
+    trust-store-password: 1q2w3e4r
