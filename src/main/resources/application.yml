@@ -1,6 +1,6 @@
 spring:
   application:
-    name: spring security 02
+    name: spring security 03
   thymeleaf:
     cache: true
   security:
@@ -21,3 +21,4 @@ server:
     key-password: 1q2w3e4r
     trust-store: classpath:prgrms_truststore.p12
     trust-store-password: 1q2w3e4r
+  port: 8443
