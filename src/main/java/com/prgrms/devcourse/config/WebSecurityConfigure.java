@@ -59,6 +59,9 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
 
                 .formLogin()//스프링 시큐리티가 자동으로 로그인 페이지를 생성해 주는 것을 생성
                 .defaultSuccessUrl("/me") //성공 시 리다이렉트 페이지
+//                .loginPage("my-login")
+//                .usernameParameter("my-username")
+//                .passwordParameter("my-password")
                 .permitAll() //로그인 페이지는 익명 페이지
                 .and()
 
