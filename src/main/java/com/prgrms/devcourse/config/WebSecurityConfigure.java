@@ -4,15 +4,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.expression.SecurityExpressionHandler;
+import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -37,6 +41,16 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
 
                 .withUser("admin")
                 .password("{noop}admin123")
+                .roles("ADMIN")
+                .and()
+
+                .withUser("admin1")
+                .password("{noop}admin123")
+                .roles("ADMIN")
+                .and()
+
+                .withUser("admin2")
+                .password("{noop}admin123")
                 .roles("ADMIN");
     }
 
@@ -48,17 +62,25 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
         //불필요한 자원 소모 방지
     }
 
+    public SecurityExpressionHandler<FilterInvocation> securityExpressionHandler() {
+        return new CustomWebSecurityExpressionHandler(
+                new AuthenticationTrustResolverImpl(),
+                "ROLE_"
+        );
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()//공개 리소스, 혹은 보호받는 리소스에 대해 세부 설정을 할 수 있는 부분
                 .antMatchers("/me").hasAnyRole("USER", "ADMIN")
-                .antMatchers("/admin").access("hasRole('ADMIN') and isFullyAuthenticated()") //isFullyAuthenticated 는 remember me 사용 불가
+                .antMatchers("/admin").access("hasRole('ADMIN') and isFullyAuthenticated() and oddAdmin") //isFullyAuthenticated 는 remember me 사용 불가
                 .anyRequest().permitAll()
+                .expressionHandler(securityExpressionHandler())
                 .and()
 
                 .formLogin()//스프링 시큐리티가 자동으로 로그인 페이지를 생성해 주는 것을 생성
-                .defaultSuccessUrl("/me") //성공 시 리다이렉트 페이지
+                .defaultSuccessUrl("/") //성공 시 리다이렉트 페이지
 //                .loginPage("my-login")
 //                .usernameParameter("my-username")
 //                .passwordParameter("my-password")
@@ -81,6 +103,16 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
                 .requiresChannel()
                 .anyRequest()
                 .requiresSecure()
+                .and()
+
+                .sessionManagement()
+                .sessionFixation()
+                .changeSessionId()
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .invalidSessionUrl("/")
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false)
+                .and()
                 .and()
 
                 .exceptionHandling()
