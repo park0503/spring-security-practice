@@ -38,7 +38,7 @@ public class OddAdminVoter implements AccessDecisionVoter<FilterInvocation> {
     public int vote(Authentication authentication, FilterInvocation fi, Collection<ConfigAttribute> attributes) {
         HttpServletRequest request = fi.getRequest();
         //Url이 admin인가?
-        if(requiresAuthorization(request)) {
+        if(!requiresAuthorization(request)) {
             return ACCESS_GRANTED;
         }
         User user = (User) authentication.getPrincipal();
