@@ -19,7 +19,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -37,30 +36,10 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    private final DataSource dataSource;
 
-        auth
-                .inMemoryAuthentication()
-                .withUser("user")
-                .password("{noop}user123")
-                .roles("USER")
-                .and()
-
-                .withUser("admin")
-                .password("{noop}admin123")
-                .roles("ADMIN")
-                .and()
-
-                .withUser("admin1")
-                .password("{noop}admin123")
-                .roles("ADMIN")
-                .and()
-
-                .withUser("admin2")
-                .password("{noop}admin123")
-                .roles("ADMIN");
+    public WebSecurityConfigure(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @Bean
@@ -79,7 +58,56 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
         return new DelegatingSecurityContextAsyncTaskExecutor(delegate);
     }
 
+//    @Bean
+//    public UserDetailsService userDetailsService() {
+//        JdbcDaoImpl jdbcDao = new JdbcDaoImpl();
+//        //SELECT login_id, passwd, true FROM USERS where users.login_id = 'user';
+//        jdbcDao.setDataSource(dataSource);
+//        jdbcDao.setEnableAuthorities(false);
+//        jdbcDao.setEnableGroups(true);
+//        jdbcDao.setUsersByUsernameQuery(
+//                "SELECT " +
+//                "login_id, passwd, true " +
+//                "FROM " +
+//                "users " +
+//                "WHERE " +
+//                "login_id = ?"
+//        );
+//        jdbcDao.setGroupAuthoritiesByUsernameQuery(
+//                "SELECT " +
+//                "u.login_id, g.name, p.name " +
+//                "FROM " +
+//                "users u JOIN groups g ON u.group_id = g.id " +
+//                "LEFT JOIN group_permission gp ON g.id = gp.group_id " +
+//                "JOIN permissions p ON p.id = gp.permission_id " +
+//                "WHERE " +
+//                "u.login_id = ?"
+//        );
+//        return jdbcDao;
+//    }
 
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+                .jdbcAuthentication()
+                .dataSource(dataSource)
+                .usersByUsernameQuery("SELECT " +
+                        "login_id, passwd, true " +
+                        "FROM " +
+                        "users " +
+                        "WHERE " +
+                        "login_id = ?")
+                .groupAuthoritiesByUsername("SELECT " +
+                        "u.login_id, g.name, p.name " +
+                        "FROM " +
+                        "users u JOIN groups g ON u.group_id = g.id " +
+                        "LEFT JOIN group_permission gp ON g.id = gp.group_id " +
+                        "JOIN permissions p ON p.id = gp.permission_id " +
+                        "WHERE " +
+                        "u.login_id = ?")
+                .getUserDetailsService()
+                .setEnableAuthorities(false);
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -109,7 +137,7 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
                 .antMatchers("/me").hasAnyRole("USER", "ADMIN")
                 .antMatchers("/admin").access("hasRole('ADMIN') and isFullyAuthenticated()") //isFullyAuthenticated 는 remember me 사용 불가
                 .anyRequest().permitAll()
-                .accessDecisionManager(accessDecisionManager())
+//                .accessDecisionManager(accessDecisionManager())
 //                .expressionHandler(securityExpressionHandler())
                 .and()
 
