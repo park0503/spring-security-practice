@@ -16,7 +16,6 @@ CREATE TABLE groups
     name varchar(20) NOT NULL,
     PRIMARY KEY (id)
 );
-
 CREATE TABLE group_permission
 (
     id            bigint NOT NULL,

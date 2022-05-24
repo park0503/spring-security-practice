@@ -1,5 +1,6 @@
 package com.prgrms.devcourse.config;
 
+import com.prgrms.devcourse.user.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -36,10 +37,10 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final DataSource dataSource;
+    private final UserService userService;
 
-    public WebSecurityConfigure(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public WebSecurityConfigure(DataSource dataSource, UserService userService) {
+        this.userService = userService;
     }
 
     @Bean
@@ -58,55 +59,9 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
         return new DelegatingSecurityContextAsyncTaskExecutor(delegate);
     }
 
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        JdbcDaoImpl jdbcDao = new JdbcDaoImpl();
-//        //SELECT login_id, passwd, true FROM USERS where users.login_id = 'user';
-//        jdbcDao.setDataSource(dataSource);
-//        jdbcDao.setEnableAuthorities(false);
-//        jdbcDao.setEnableGroups(true);
-//        jdbcDao.setUsersByUsernameQuery(
-//                "SELECT " +
-//                "login_id, passwd, true " +
-//                "FROM " +
-//                "users " +
-//                "WHERE " +
-//                "login_id = ?"
-//        );
-//        jdbcDao.setGroupAuthoritiesByUsernameQuery(
-//                "SELECT " +
-//                "u.login_id, g.name, p.name " +
-//                "FROM " +
-//                "users u JOIN groups g ON u.group_id = g.id " +
-//                "LEFT JOIN group_permission gp ON g.id = gp.group_id " +
-//                "JOIN permissions p ON p.id = gp.permission_id " +
-//                "WHERE " +
-//                "u.login_id = ?"
-//        );
-//        return jdbcDao;
-//    }
-
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .jdbcAuthentication()
-                .dataSource(dataSource)
-                .usersByUsernameQuery("SELECT " +
-                        "login_id, passwd, true " +
-                        "FROM " +
-                        "users " +
-                        "WHERE " +
-                        "login_id = ?")
-                .groupAuthoritiesByUsername("SELECT " +
-                        "u.login_id, g.name, p.name " +
-                        "FROM " +
-                        "users u JOIN groups g ON u.group_id = g.id " +
-                        "LEFT JOIN group_permission gp ON g.id = gp.group_id " +
-                        "JOIN permissions p ON p.id = gp.permission_id " +
-                        "WHERE " +
-                        "u.login_id = ?")
-                .getUserDetailsService()
-                .setEnableAuthorities(false);
+        auth.userDetailsService(userService);
     }
 
     @Bean
