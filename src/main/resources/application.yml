@@ -9,6 +9,10 @@ spring:
     basename: i18n/messages
     encoding: UTF-8
     cache-duration: PT1H
+  session:
+    store-type: jdbc
+    jdbc:
+      initialize-schema: never #sql init schema-locations 부분에 왔던 내용이 올 수 있다.
   h2:
     console:
       enabled: true
@@ -26,7 +30,7 @@ spring:
       hibernate.dialect: org.hibernate.dialect.H2Dialect
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:spring_security;MODE=MYSQL;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:file:./database/spring_security.db;MODE=MYSQL;DB_CLOSE_DELAY=-1
     username: sa
     password:
     hikari:
@@ -36,9 +40,10 @@ spring:
   sql:
     init:
       platform: h2
-      schema-locations: classpath:sql/schema_new.sql
+      schema-locations: classpath:sql/schema_new.sql, classpath:org/springframework/session/jdbc/schema-h2.sql
       data-locations: classpath:sql/data_new.sql
       encoding: UTF-8
+      mode: never
 server:
   ssl:
     enabled: true
