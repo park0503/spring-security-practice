@@ -31,6 +31,22 @@ public class JwtConfigure {
         return expirySeconds;
     }
 
+    public void setHeader(String header) {
+        this.header = header;
+    }
+
+    public void setIssuer(String issuer) {
+        this.issuer = issuer;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
+    }
+
+    public void setExpirySeconds(int expirySeconds) {
+        this.expirySeconds = expirySeconds;
+    }
+
     @Override
     public String toString() {
         return "JwtConfigure{" +
