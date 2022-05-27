@@ -1,5 +1,7 @@
 package com.prgrms.devcourse.user;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import javax.persistence.*;
 
 @Table(name = "users")
@@ -20,6 +22,12 @@ public class User {
     private Group group;
 
     public User() {
+    }
+
+    public void checkPassword(PasswordEncoder passwordEncoder, String credentials) {
+        if (!passwordEncoder.matches(credentials, this.passwd)) {
+            throw new IllegalArgumentException("Bad credentials");
+        }
     }
 
     public Long getId() {
