@@ -35,7 +35,7 @@ spring:
     init:
       platform: h2
       schema-locations: classpath:sql/schema_new.sql
-      data-locations: classpath:sql/data_new.sql
+      data-locations: classpath:sql/data_new.sql, classpath:org/springframework/security/oauth2/client/oauth2-client-schema.sql
       encoding: UTF-8
   security:
     oauth2:
@@ -55,6 +55,8 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+  main:
+    allow-circular-references: true
 server:
   port: 8080
 jwt:
