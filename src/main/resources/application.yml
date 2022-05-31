@@ -2,7 +2,7 @@ spring:
   profiles:
     active: default
   application:
-    name: spring security 09
+    name: spring security 10
   messages:
     basename: i18n/messages
     encoding: UTF-8
@@ -37,6 +37,24 @@ spring:
       schema-locations: classpath:sql/schema_new.sql
       data-locations: classpath:sql/data_new.sql
       encoding: UTF-8
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-name: kakao
+            client-id: a8d32d30d39e9d641d6b8d20e362b2c0
+            client-secret: REWA29OqIkUqN0Je9re7X6wUEyEomv0f
+            scope: profile_nickname, profile_image
+            redirect-uri: "http://localhost:8080/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
+            client-authentication-method: POST
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
 server:
   port: 8080
 jwt:

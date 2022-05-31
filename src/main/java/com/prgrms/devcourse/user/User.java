@@ -4,6 +4,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
 
+import java.util.Optional;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 @Table(name = "users")
 @Entity
 public class User {
@@ -11,35 +16,55 @@ public class User {
     @GeneratedValue
     private Long id;
 
-    @Column(length = 20, unique = true, nullable = false, name = "login_id")
-    private String loginId;
+    @Column(name = "username")
+    private String username;
 
-    @Column(length = 80, nullable = false)
-    private String passwd;
+    @Column(name = "provider")
+    private String provider;
+
+    @Column(name = "provider_id")
+    private String providerId;
+
+    @Column(name = "profile_image")
+    private String profileImage;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "group_id", referencedColumnName = "id")
     private Group group;
 
-    public User() {
+    protected User() {
     }
 
-    public void checkPassword(PasswordEncoder passwordEncoder, String credentials) {
-        if (!passwordEncoder.matches(credentials, this.passwd)) {
-            throw new IllegalArgumentException("Bad credentials");
-        }
+    public User(String username, String provider, String providerId, String profileImage, Group group) {
+        checkArgument(isNotEmpty(username), "username must me provided");
+        checkArgument(isNotEmpty(provider), "provider must me provided");
+        checkArgument(isNotEmpty(providerId), "providerId must me provided");
+        checkArgument(group != null, "group must me provided");
+        this.username = username;
+        this.provider = provider;
+        this.providerId = providerId;
+        this.profileImage = profileImage;
+        this.group = group;
     }
 
     public Long getId() {
         return id;
     }
 
-    public String getLoginId() {
-        return loginId;
+    public String getUsername() {
+        return username;
     }
 
-    public String getPasswd() {
-        return passwd;
+    public String getProvider() {
+        return provider;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public Optional<String> getProfileImage() {
+        return Optional.ofNullable(profileImage);
     }
 
     public Group getGroup() {
@@ -50,8 +75,10 @@ public class User {
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", loginId='" + loginId + '\'' +
-                ", passwd='" + passwd + '\'' +
+                ", username='" + username + '\'' +
+                ", provider='" + provider + '\'' +
+                ", providerId='" + providerId + '\'' +
+                ", profileImage='" + profileImage + '\'' +
                 ", group=" + group +
                 '}';
     }

@@ -29,11 +29,14 @@ CREATE TABLE group_permission
 
 CREATE TABLE users
 (
-    id       bigint      NOT NULL,
-    login_id varchar(20) NOT NULL,
-    passwd   varchar(80) NOT NULL,
-    group_id bigint      NOT NULL,
+    id            bigint        NOT NULL AUTO_INCREMENT,
+    username      varchar(20)   NOT NULL,
+    provider      varchar(20)   NOT NULL,
+    provider_id   varchar(80)   NOT NULL,
+    profile_image varchar(255)  DEFAULT NULL,
+    group_id      bigint        NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT unq_login_id UNIQUE (login_id),
+    CONSTRAINT unq_username UNIQUE (username),
+    CONSTRAINT unq_provider_and_id UNIQUE (provider, provider_id),
     CONSTRAINT fk_group_id_for_user FOREIGN KEY (group_id) REFERENCES groups (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 );
